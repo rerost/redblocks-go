@@ -8,4 +8,4 @@ vendor:
 
 PHONY: test
 test: vendor
-	go test -v ./... | gex cgt
+	go test -race -coverprofile=coverage.txt -v ./...  | gex cgt
