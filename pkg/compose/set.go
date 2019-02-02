@@ -13,7 +13,7 @@ type ComposedSet interface {
 	Key() string
 	Warmup(ctx context.Context) error
 	IDs(ctx context.Context, opts ...options.PagenationOption) ([]store.ID, error)
-	IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]store.IDsWithScore, error)
+	IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]store.IDWithScore, error)
 }
 
 func Compose(wrapped set.Set, store store.Store) ComposedSet {

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type IDsWithScore struct {
+type IDWithScore struct {
 	ID    ID
 	Score float64
 }
@@ -13,9 +13,9 @@ type IDsWithScore struct {
 type ID string
 
 type Store interface {
-	Save(ctx context.Context, key string, idsWithScore []IDsWithScore, expire time.Duration) error
+	Save(ctx context.Context, key string, idsWithScore []IDWithScore, expire time.Duration) error
 	GetIDs(ctx context.Context, key string, head int64, tail int64) ([]ID, error)
-	GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDsWithScore, error)
+	GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDWithScore, error)
 	Exists(ctx context.Context, key string) (bool, error)
 	Interstore(ctx context.Context, dst string, keys ...string) error
 	Unionstore(ctx context.Context, dst string, keys ...string) error

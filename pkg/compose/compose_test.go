@@ -1,4 +1,4 @@
-package set_test
+package compose_test
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/rerost/redblocks-go/pkg/compose"
 	"github.com/rerost/redblocks-go/pkg/operator"
+	"github.com/rerost/redblocks-go/pkg/options"
 	"github.com/rerost/redblocks-go/pkg/set"
 	"github.com/rerost/redblocks-go/pkg/store"
 )
@@ -25,8 +26,8 @@ func (r regionSetImp) KeySuffix() string {
 	return r.region
 }
 
-func (r regionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
-	m := map[string][]set.IDsWithScore{
+func (r regionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
+	m := map[string][]set.IDWithScore{
 		"tokyo": {
 			{
 				ID: "test1",
@@ -57,7 +58,7 @@ func (r regionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
 }
 
 func (r regionSetImp) CacheTime() time.Duration {
-	return time.Second * 100
+	return time.Second * 1000
 }
 
 func newPool() *redis.Pool {
@@ -76,6 +77,15 @@ func TestCreateRegion(t *testing.T) {
 
 	if diff := cmp.Diff(tokyo.Key(), osaka.Key()); diff == "" {
 		t.Errorf("tokyo.Key and osaka.Key must be different")
+	}
+
+	ctx := context.Background()
+	ids, err := tokyo.IDs(ctx, options.WithPagenation(0, -1))
+	if err != nil {
+		t.Error(err)
+	}
+	if diff := cmp.Diff(ids, []set.ID{"test1", "test2", "test3"}); diff != "" {
+		t.Errorf(diff)
 	}
 }
 

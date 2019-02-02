@@ -28,7 +28,7 @@ func ComposeWarmup(set set.Set, store store.Store) WithWarmup {
 func (c withWarmupImp) KeySuffix() string {
 	return c.set.KeySuffix()
 }
-func (c withWarmupImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
+func (c withWarmupImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
 	return c.set.Get(ctx)
 }
 func (c withWarmupImp) CacheTime() time.Duration {

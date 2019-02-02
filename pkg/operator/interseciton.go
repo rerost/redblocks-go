@@ -33,10 +33,10 @@ func (s intersectionSetImp) KeySuffix() string {
 	return ""
 }
 
-func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
+func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
 	err := s.Warmup(ctx)
 	if err != nil {
-		return []set.IDsWithScore{}, fail.Wrap(err)
+		return []set.IDWithScore{}, fail.Wrap(err)
 	}
 	return s.store.GetIDsWithScore(ctx, s.Key(), 0, -1)
 }
@@ -57,6 +57,9 @@ func (s intersectionSetImp) Warmup(ctx context.Context) error {
 	keys := make([]string, len(s.sets), len(s.sets))
 	for i, set := range s.sets {
 		keys[i] = set.Key()
+	}
+	for _, set := range s.sets {
+		set.Warmup(ctx)
 	}
 
 	err := s.store.Interstore(ctx, s.Key(), keys...)
