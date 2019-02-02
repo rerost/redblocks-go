@@ -23,7 +23,7 @@ func (s redisStoreImp) Save(ctx context.Context, key string, idsWithScore []IDWi
 	conn := s.pool.Get()
 
 	for _, idWithScore := range idsWithScore {
-		err := conn.Send("ZADD", key, idWithScore.ID, idWithScore.Score)
+		err := conn.Send("ZADD", key, idWithScore.Score, idWithScore.ID)
 		if err != nil {
 			return fail.Wrap(err)
 		}
