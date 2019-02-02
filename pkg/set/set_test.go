@@ -2,7 +2,6 @@ package set_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -78,10 +77,6 @@ func TestCreateRegion(t *testing.T) {
 	if diff := cmp.Diff(tokyo.Key(), osaka.Key()); diff == "" {
 		t.Errorf("tokyo.Key and osaka.Key must be different")
 	}
-
-	ctx := context.Background()
-	fmt.Println(tokyo.IDs(ctx))
-	fmt.Println(osaka.IDsWithScore(ctx))
 }
 
 func TestIntersection(t *testing.T) {
