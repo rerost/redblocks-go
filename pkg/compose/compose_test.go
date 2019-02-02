@@ -117,7 +117,7 @@ func TesUnion(t *testing.T) {
 	osaka := compose.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	interstored := operator.NewIntersectionSet(store, time.Second*100, tokyo, osaka)
+	interstored := operator.NewUnionSet(store, time.Second*100, tokyo, osaka)
 	interstoredResult, err := interstored.IDsWithScore(ctx)
 	if err != nil {
 		t.Error(err)
