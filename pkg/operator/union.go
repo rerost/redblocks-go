@@ -18,22 +18,22 @@ type unionSetImp struct {
 }
 
 func NewUnionSet(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.ComposedSet {
-	return compose.ComposeIDs(NewIntersectionSetImp(store, cacheTime, sets...), store)
+	return compose.ComposeIDs(NewUnionSetImp(store, cacheTime, sets...), store)
 }
 
 func NewUnionSetImp(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.WithWarmup {
-	return intersectionSetImp{
+	return unionSetImp{
 		store:     store,
 		sets:      sets,
 		cacheTime: cacheTime,
 	}
 }
 
-func (s intersectionSetImp) KeySuffix() string {
+func (s unionSetImp) KeySuffix() string {
 	return ""
 }
 
-func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
+func (s unionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
 	err := s.Warmup(ctx)
 	if err != nil {
 		return []set.IDsWithScore{}, fail.Wrap(err)
@@ -41,11 +41,11 @@ func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error)
 	return s.store.GetIDsWithScore(ctx, s.Key(), 0, -1)
 }
 
-func (s intersectionSetImp) CacheTime() time.Duration {
+func (s unionSetImp) CacheTime() time.Duration {
 	return s.cacheTime
 }
 
-func (s intersectionSetImp) Key() string {
+func (s unionSetImp) Key() string {
 	keys := make([]string, len(s.sets), len(s.sets))
 	for i, set := range s.sets {
 		keys[i] = set.Key()
@@ -53,7 +53,7 @@ func (s intersectionSetImp) Key() string {
 	return strings.Join(keys, "|")
 }
 
-func (s intersectionSetImp) Warmup(ctx context.Context) error {
+func (s unionSetImp) Warmup(ctx context.Context) error {
 	keys := make([]string, len(s.sets), len(s.sets))
 	for i, set := range s.sets {
 		keys[i] = set.Key()
