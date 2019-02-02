@@ -1,4 +1,6 @@
 # redblocks-go
+This package is **still under development**.
+
 This package is Go implemntation of [Altech/red_blocks](https://github.com/Altech/red_blocks).
 
 [![CircleCI](https://circleci.com/gh/rerost/redblocks-go/tree/master.svg?style=svg)](https://circleci.com/gh/rerost/redblocks-go/tree/master) [![codecov](https://codecov.io/gh/rerost/redblocks-go/branch/master/graph/badge.svg)](https://codecov.io/gh/rerost/redblocks-go)
