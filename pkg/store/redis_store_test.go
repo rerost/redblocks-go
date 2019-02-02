@@ -18,7 +18,7 @@ func TestRediStoreGetIDs(t *testing.T) {
 	})
 	key := "TestRediStoreGetIDs"
 	ctx := context.Background()
-	err := redisStore.Save(ctx, key, []store.IDsWithScore{
+	err := redisStore.Save(ctx, key, []store.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -51,7 +51,7 @@ func TestRediStoreGetIDsWithScore(t *testing.T) {
 	key := "TestRediStoreGetIDsWithScore"
 	ctx := context.Background()
 
-	idsWithScore := []store.IDsWithScore{
+	idsWithScore := []store.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -86,7 +86,7 @@ func TestRedisStoreExists(t *testing.T) {
 	key := "TestRedisStoreExists"
 	ctx := context.Background()
 
-	idsWithScore := []store.IDsWithScore{
+	idsWithScore := []store.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -122,7 +122,7 @@ func TestRedisStoreInterstore(t *testing.T) {
 	key2 := "TestRedisStoreInterstore2"
 	ctx := context.Background()
 
-	idsWithScore1 := []store.IDsWithScore{
+	idsWithScore1 := []store.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -133,7 +133,7 @@ func TestRedisStoreInterstore(t *testing.T) {
 		},
 	}
 
-	idsWithScore2 := []store.IDsWithScore{
+	idsWithScore2 := []store.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -167,7 +167,7 @@ func TestRedisStoreInterstore(t *testing.T) {
 		t.Error(err)
 	}
 
-	if diff := cmp.Diff(result, []store.IDsWithScore{{ID: "1", Score: 2}, {ID: "2", Score: 4}}); diff != "" {
+	if diff := cmp.Diff(result, []store.IDWithScore{{ID: "1", Score: 2}, {ID: "2", Score: 4}}); diff != "" {
 		t.Errorf(diff)
 	}
 }

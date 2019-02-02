@@ -13,7 +13,7 @@ import (
 type WithIDs interface {
 	WithWarmup
 	IDs(ctx context.Context, opts ...options.PagenationOption) ([]set.ID, error)
-	IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]set.IDsWithScore, error)
+	IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]set.IDWithScore, error)
 }
 
 type withIDsImp struct {
@@ -28,7 +28,7 @@ func ComposeIDs(set WithWarmup, store store.Store) WithIDs {
 func (c withIDsImp) KeySuffix() string {
 	return c.set.KeySuffix()
 }
-func (c withIDsImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
+func (c withIDsImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
 	return c.set.Get(ctx)
 }
 func (c withIDsImp) CacheTime() time.Duration {
@@ -63,15 +63,15 @@ func (c withIDsImp) IDs(ctx context.Context, opts ...options.PagenationOption) (
 	return r, nil
 }
 
-func (c withIDsImp) IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]store.IDsWithScore, error) {
+func (c withIDsImp) IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]store.IDWithScore, error) {
 	opt, err := options.PagenationOptionsToPagenationOption(opts)
 	if err != nil {
-		return []store.IDsWithScore{}, fail.Wrap(err)
+		return []store.IDWithScore{}, fail.Wrap(err)
 	}
 
 	exists, err := c.store.Exists(ctx, c.Key())
 	if err != nil {
-		return []store.IDsWithScore{}, fail.Wrap(err)
+		return []store.IDWithScore{}, fail.Wrap(err)
 	}
 	if !exists {
 		c.Warmup(ctx)
@@ -79,7 +79,7 @@ func (c withIDsImp) IDsWithScore(ctx context.Context, opts ...options.Pagenation
 
 	r, err := c.store.GetIDsWithScore(ctx, c.Key(), opt.Head, opt.Tail)
 	if err != nil {
-		return []store.IDsWithScore{}, fail.Wrap(err)
+		return []store.IDWithScore{}, fail.Wrap(err)
 	}
 
 	return r, nil

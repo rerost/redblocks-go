@@ -33,10 +33,10 @@ func (s intersectionSetImp) KeySuffix() string {
 	return ""
 }
 
-func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
+func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
 	err := s.Warmup(ctx)
 	if err != nil {
-		return []set.IDsWithScore{}, fail.Wrap(err)
+		return []set.IDWithScore{}, fail.Wrap(err)
 	}
 	return s.store.GetIDsWithScore(ctx, s.Key(), 0, -1)
 }

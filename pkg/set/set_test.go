@@ -25,8 +25,8 @@ func (r regionSetImp) KeySuffix() string {
 	return r.region
 }
 
-func (r regionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
-	m := map[string][]set.IDsWithScore{
+func (r regionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
+	m := map[string][]set.IDWithScore{
 		"tokyo": {
 			{
 				ID: "test1",

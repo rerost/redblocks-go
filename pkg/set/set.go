@@ -9,9 +9,9 @@ import (
 
 type Set interface {
 	KeySuffix() string
-	Get(ctx context.Context) ([]IDsWithScore, error)
+	Get(ctx context.Context) ([]IDWithScore, error)
 	CacheTime() time.Duration
 }
 
 type ID = store.ID
-type IDsWithScore = store.IDsWithScore
+type IDWithScore = store.IDWithScore

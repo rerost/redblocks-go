@@ -19,7 +19,7 @@ type redisStoreImp struct {
 	pool *redis.Pool
 }
 
-func (s redisStoreImp) Save(ctx context.Context, key string, idsWithScore []IDsWithScore, expire time.Duration) error {
+func (s redisStoreImp) Save(ctx context.Context, key string, idsWithScore []IDWithScore, expire time.Duration) error {
 	conn := s.pool.Get()
 
 	for _, idWithScore := range idsWithScore {
@@ -53,15 +53,15 @@ func (s redisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail 
 	return ids, nil
 }
 
-func (s redisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDsWithScore, error) {
+func (s redisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDWithScore, error) {
 	conn := s.pool.Get()
 
 	results, err := redis.Strings(conn.Do("ZRANGE", key, head, tail, "WITHSCORES"))
 	if err != nil {
-		return []IDsWithScore{}, fail.Wrap(err)
+		return []IDWithScore{}, fail.Wrap(err)
 	}
 
-	idsWithScore := make([]IDsWithScore, len(results)/2, len(results)/2)
+	idsWithScore := make([]IDWithScore, len(results)/2, len(results)/2)
 	for i, result := range results {
 		if i%2 == 0 {
 			idsWithScore[i/2].ID = ID(result)
