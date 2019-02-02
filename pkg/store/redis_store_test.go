@@ -171,3 +171,64 @@ func TestRedisStoreInterstore(t *testing.T) {
 		t.Errorf(diff)
 	}
 }
+
+func TestRedisStoreUnionstore(t *testing.T) {
+	redisStore := store.NewRedisStore(&redis.Pool{
+		MaxIdle:     3,
+		IdleTimeout: 240 * time.Second,
+		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
+	})
+	key := "TestRedisStoreUnionstore"
+	key1 := "TestRedisStoreUnionstore1"
+	key2 := "TestRedisStoreUnionstore2"
+	ctx := context.Background()
+
+	idsWithScore1 := []store.IDWithScore{
+		{
+			ID:    "1",
+			Score: 1,
+		},
+		{
+			ID:    "2",
+			Score: 2,
+		},
+	}
+
+	idsWithScore2 := []store.IDWithScore{
+		{
+			ID:    "1",
+			Score: 1,
+		},
+		{
+			ID:    "2",
+			Score: 2,
+		},
+		{
+			ID:    "3",
+			Score: 3,
+		},
+	}
+
+	err := redisStore.Save(ctx, key1, idsWithScore1, 100*time.Second)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = redisStore.Save(ctx, key2, idsWithScore2, 100*time.Second)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = redisStore.Unionstore(ctx, key, key1, key2)
+	if err != nil {
+		t.Error(err)
+	}
+	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(result, []store.IDWithScore{{ID: "1", Score: 2}, {ID: "3", Score: 3}, {ID: "2", Score: 4}}); diff != "" {
+		t.Errorf(diff)
+	}
+}
