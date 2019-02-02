@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/rerost/red-blocks-go/pkg/set"
-	"github.com/rerost/red-blocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/set"
+	"github.com/rerost/redblocks-go/pkg/store"
 	"github.com/srvc/fail"
 )
 

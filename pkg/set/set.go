@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/rerost/red-blocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/store"
 )
 
 type Set interface {
