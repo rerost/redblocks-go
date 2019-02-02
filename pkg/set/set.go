@@ -1,6 +1,7 @@
 package set
 
 import (
+	"context"
 	"time"
 
 	"github.com/rerost/red-blocks-go/pkg/store"
@@ -8,7 +9,7 @@ import (
 
 type Set interface {
 	KeySuffix() string
-	Get() ([]IDsWithScore, error)
+	Get(ctx context.Context) ([]IDsWithScore, error)
 	CacheTime() time.Duration
 }
 

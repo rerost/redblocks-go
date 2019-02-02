@@ -8,6 +8,7 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/go-cmp/cmp"
+	"github.com/rerost/red-blocks-go/pkg/compose"
 	"github.com/rerost/red-blocks-go/pkg/set"
 	"github.com/rerost/red-blocks-go/pkg/store"
 )
@@ -24,7 +25,7 @@ func (r regionSetImp) KeySuffix() string {
 	return r.region
 }
 
-func (r regionSetImp) Get() ([]set.IDsWithScore, error) {
+func (r regionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
 	m := map[string][]set.IDsWithScore{
 		"tokyo": {
 			{
@@ -70,8 +71,8 @@ func newPool() *redis.Pool {
 
 func TestCreateRegion(t *testing.T) {
 	store := store.NewRedisStore(newPool())
-	tokyo := set.Compose(NewRegionSet("tokyo"), store)
-	osaka := set.Compose(NewRegionSet("osaka"), store)
+	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
+	osaka := compose.Compose(NewRegionSet("osaka"), store)
 
 	if diff := cmp.Diff(tokyo.Key(), osaka.Key()); diff == "" {
 		t.Errorf("tokyo.Key and osaka.Key must be different")
