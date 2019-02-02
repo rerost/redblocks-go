@@ -58,6 +58,9 @@ func (s intersectionSetImp) Warmup(ctx context.Context) error {
 	for i, set := range s.sets {
 		keys[i] = set.Key()
 	}
+	for _, set := range s.sets {
+		set.Warmup(ctx)
+	}
 
 	err := s.store.Interstore(ctx, s.Key(), keys...)
 	if err != nil {
