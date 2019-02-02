@@ -46,14 +46,11 @@ func (s redisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail 
 		return []ID{}, fail.Wrap(err)
 	}
 
-	var ids interface{} = IDs
-
-	v, ok := ids.([]ID)
-	if !ok {
-		return []ID{}, fail.Wrap(fail.New("Failed to convert"))
+	ids := make([]ID, len(IDs), len(IDs))
+	for i, id := range IDs {
+		ids[i] = ID(id)
 	}
-
-	return v, nil
+	return ids, nil
 }
 
 func (s redisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDsWithScore, error) {
