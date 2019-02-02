@@ -11,17 +11,17 @@ import (
 	"github.com/srvc/fail"
 )
 
-type intersectionSetImp struct {
+type unionSetImp struct {
 	store     store.Store
 	sets      []compose.ComposedSet
 	cacheTime time.Duration
 }
 
-func NewIntersectionSet(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.ComposedSet {
+func NewUnionSet(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.ComposedSet {
 	return compose.ComposeIDs(NewIntersectionSetImp(store, cacheTime, sets...), store)
 }
 
-func NewIntersectionSetImp(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.WithWarmup {
+func NewUnionSetImp(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.WithWarmup {
 	return intersectionSetImp{
 		store:     store,
 		sets:      sets,
@@ -50,7 +50,7 @@ func (s intersectionSetImp) Key() string {
 	for i, set := range s.sets {
 		keys[i] = set.Key()
 	}
-	return strings.Join(keys, "&")
+	return strings.Join(keys, "|")
 }
 
 func (s intersectionSetImp) Warmup(ctx context.Context) error {
@@ -59,7 +59,7 @@ func (s intersectionSetImp) Warmup(ctx context.Context) error {
 		keys[i] = set.Key()
 	}
 
-	err := s.store.Interstore(ctx, s.Key(), keys...)
+	err := s.store.Unionstore(ctx, s.Key(), keys...)
 	if err != nil {
 		return fail.Wrap(err)
 	}
