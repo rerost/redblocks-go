@@ -2,14 +2,15 @@ package set_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/go-cmp/cmp"
-	"github.com/rerost/red-blocks-go/pkg/set"
-	"github.com/rerost/red-blocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/compose"
+	"github.com/rerost/redblocks-go/pkg/operator"
+	"github.com/rerost/redblocks-go/pkg/set"
+	"github.com/rerost/redblocks-go/pkg/store"
 )
 
 func NewRegionSet(region string) set.Set {
@@ -24,7 +25,7 @@ func (r regionSetImp) KeySuffix() string {
 	return r.region
 }
 
-func (r regionSetImp) Get() ([]set.IDsWithScore, error) {
+func (r regionSetImp) Get(ctx context.Context) ([]set.IDsWithScore, error) {
 	m := map[string][]set.IDsWithScore{
 		"tokyo": {
 			{
@@ -70,16 +71,54 @@ func newPool() *redis.Pool {
 
 func TestCreateRegion(t *testing.T) {
 	store := store.NewRedisStore(newPool())
-	tokyo := set.Compose(NewRegionSet("tokyo"), store)
-	osaka := set.Compose(NewRegionSet("osaka"), store)
+	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
+	osaka := compose.Compose(NewRegionSet("osaka"), store)
 
 	if diff := cmp.Diff(tokyo.Key(), osaka.Key()); diff == "" {
 		t.Errorf("tokyo.Key and osaka.Key must be different")
 	}
+}
+
+func TestIntersection(t *testing.T) {
+	store := store.NewRedisStore(newPool())
+	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
+	osaka := compose.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	fmt.Println(tokyo.IDs(ctx))
-	fmt.Println(osaka.IDsWithScore(ctx))
-	// interstored := set.IntersectionSet(tokyo, osaka)
-	// fmt.Println(interstored.IDs(ctx, options.WithPagenator(0, -1)))
+	interstored := operator.NewIntersectionSet(store, time.Second*100, tokyo, osaka)
+	interstoredResult, err := interstored.IDsWithScore(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tokyoResult, err := tokyo.IDsWithScore(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(interstoredResult, tokyoResult); diff != "" {
+		t.Errorf(diff)
+	}
+}
+
+func TesUnion(t *testing.T) {
+	store := store.NewRedisStore(newPool())
+	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
+	osaka := compose.Compose(NewRegionSet("osaka"), store)
+
+	ctx := context.Background()
+	interstored := operator.NewIntersectionSet(store, time.Second*100, tokyo, osaka)
+	interstoredResult, err := interstored.IDsWithScore(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	osakaResult, err := osaka.IDsWithScore(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(interstoredResult, osakaResult); diff != "" {
+		t.Errorf(diff)
+	}
 }

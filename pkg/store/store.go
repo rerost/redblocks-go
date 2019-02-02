@@ -17,4 +17,6 @@ type Store interface {
 	GetIDs(ctx context.Context, key string, head int64, tail int64) ([]ID, error)
 	GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDsWithScore, error)
 	Exists(ctx context.Context, key string) (bool, error)
+	Interstore(ctx context.Context, dst string, keys ...string) error
+	Unionstore(ctx context.Context, dst string, keys ...string) error
 }

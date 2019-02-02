@@ -90,3 +90,29 @@ func (s redisStoreImp) Exists(ctx context.Context, key string) (bool, error) {
 
 	return result, nil
 }
+
+func (s redisStoreImp) Interstore(ctx context.Context, dst string, keys ...string) error {
+	conn := s.pool.Get()
+	args := make([]interface{}, len(keys)+2, len(keys)+2)
+	args[0] = dst
+	args[1] = len(keys)
+	for i, k := range keys {
+		args[i+2] = k
+	}
+
+	_, err := conn.Do("ZINTERSTORE", args...)
+	return fail.Wrap(err)
+}
+
+func (s redisStoreImp) Unionstore(ctx context.Context, dst string, keys ...string) error {
+	conn := s.pool.Get()
+	args := make([]interface{}, len(keys)+2, len(keys)+2)
+	args[0] = dst
+	args[1] = len(keys)
+	for i, k := range keys {
+		args[i+2] = k
+	}
+
+	_, err := conn.Do("ZUNIONSTORE", args...)
+	return fail.Wrap(err)
+}
