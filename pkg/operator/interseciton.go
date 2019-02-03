@@ -12,20 +12,22 @@ import (
 )
 
 type intersectionSetImp struct {
-	store     store.Store
-	sets      []compose.ComposedSet
-	cacheTime time.Duration
+	store         store.Store
+	sets          []compose.ComposedSet
+	cacheTime     time.Duration
+	notAvailableTTL time.Duration
 }
 
-func NewIntersectionSet(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.ComposedSet {
-	return compose.ComposeIDs(NewIntersectionSetImp(store, cacheTime, sets...), store)
+func NewIntersectionSet(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.ComposedSet {
+	return compose.ComposeIDs(compose.ComposeWarmup(NewIntersectionSetImp(store, cacheTime, notAvailableTTL, sets...), store), store)
 }
 
-func NewIntersectionSetImp(store store.Store, cacheTime time.Duration, sets ...compose.ComposedSet) compose.WithWarmup {
+func NewIntersectionSetImp(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.WithUpdate {
 	return intersectionSetImp{
-		store:     store,
-		sets:      sets,
-		cacheTime: cacheTime,
+		store:         store,
+		sets:          sets,
+		cacheTime:     cacheTime,
+		notAvailableTTL: notAvailableTTL,
 	}
 }
 
@@ -34,7 +36,7 @@ func (s intersectionSetImp) KeySuffix() string {
 }
 
 func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
-	err := s.Warmup(ctx)
+	err := s.Update(ctx)
 	if err != nil {
 		return []set.IDWithScore{}, fail.Wrap(err)
 	}
@@ -43,6 +45,9 @@ func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) 
 
 func (s intersectionSetImp) CacheTime() time.Duration {
 	return s.cacheTime
+}
+func (s intersectionSetImp) NotAvailableTTL() time.Duration {
+	return s.notAvailableTTL
 }
 
 func (s intersectionSetImp) Key() string {
@@ -53,7 +58,7 @@ func (s intersectionSetImp) Key() string {
 	return strings.Join(keys, "&")
 }
 
-func (s intersectionSetImp) Warmup(ctx context.Context) error {
+func (s intersectionSetImp) Update(ctx context.Context) error {
 	keys := make([]string, len(s.sets), len(s.sets))
 	for i, set := range s.sets {
 		keys[i] = set.Key()
@@ -67,4 +72,24 @@ func (s intersectionSetImp) Warmup(ctx context.Context) error {
 		return fail.Wrap(err)
 	}
 	return nil
+}
+
+func (c intersectionSetImp) Available(ctx context.Context) (bool, error) {
+	exists, err := c.store.Exists(ctx, c.Key())
+	if err != nil {
+		return false, fail.Wrap(err)
+	}
+	if !exists {
+		return false, nil
+	}
+
+	ttl, err := c.store.TTL(ctx, c.Key())
+	if err != nil {
+		return false, fail.Wrap(err)
+	}
+	if ttl < c.NotAvailableTTL() {
+		return false, nil
+	}
+
+	return true, nil
 }

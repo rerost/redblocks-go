@@ -111,6 +111,53 @@ func TestRedisStoreExists(t *testing.T) {
 	}
 }
 
+func TestRediStoreTTL(t *testing.T) {
+	redisStore := store.NewRedisStore(&redis.Pool{
+		MaxIdle:     3,
+		IdleTimeout: 240 * time.Second,
+		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
+	})
+
+	key := "TestRedisStoreTTL"
+
+	ctx := context.Background()
+
+	cacheTime := time.Second * 100
+	err := redisStore.Save(ctx, key, []store.IDWithScore{{ID: "1"}}, cacheTime)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ttl, err := redisStore.TTL(ctx, key)
+	if err != nil {
+		t.Error(err)
+	}
+	if !(0 < ttl && ttl < cacheTime) {
+		t.Errorf("want: 0 < ttl < cacheTime but ttl: %v", ttl)
+	}
+
+	emptyKey := key + ":" + "EMPTY"
+	_, err = redisStore.TTL(ctx, emptyKey)
+	if diff := cmp.Diff(err.Error(), "Not found"); diff != "" {
+		t.Errorf(diff)
+	}
+
+	conn, err := redis.Dial("tcp", "localhost:6379")
+	if err != nil {
+		t.Error(err)
+	}
+
+	notExpireKey := key + ":" + "NOT_EXPIRE"
+	_, err = conn.Do("SET", notExpireKey, notExpireKey)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = redisStore.TTL(ctx, notExpireKey)
+	if diff := cmp.Diff(err.Error(), "Not configured expire"); diff != "" {
+		t.Errorf(diff)
+	}
+}
+
 func TestRedisStoreInterstore(t *testing.T) {
 	redisStore := store.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,

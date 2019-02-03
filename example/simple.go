@@ -70,13 +70,17 @@ func (r regionSetImp) CacheTime() time.Duration {
 	return time.Second * 10
 }
 
+func (r regionSetImp) NotAvailableTTL() time.Duration {
+	return time.Second * 10
+}
+
 func main() {
 	ctx := context.Background()
 	store := store.NewRedisStore(newPool())
 	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
 	osaka := compose.Compose(NewRegionSet("osaka"), store)
 
-	sets := operator.NewIntersectionSet(store, time.Second*100, tokyo, osaka)
+	sets := operator.NewIntersectionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
 	ids, err := sets.IDs(ctx, options.WithPagenation(0, -1))
 	if err != nil {
 		fmt.Println(err)
