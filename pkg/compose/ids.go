@@ -2,7 +2,6 @@ package compose
 
 import (
 	"context"
-	"time"
 
 	"github.com/rerost/redblocks-go/pkg/options"
 	"github.com/rerost/redblocks-go/pkg/set"
@@ -10,35 +9,15 @@ import (
 	"github.com/srvc/fail"
 )
 
-type WithIDs interface {
-	WithWarmup
-	IDs(ctx context.Context, opts ...options.PagenationOption) ([]set.ID, error)
-	IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]set.IDWithScore, error)
-}
+type WithIDs = ComposedSet
 
 type withIDsImp struct {
-	set   WithWarmup
+	WithWarmup
 	store store.Store
 }
 
 func ComposeIDs(set WithWarmup, store store.Store) WithIDs {
-	return withIDsImp{set: set, store: store}
-}
-
-func (c withIDsImp) KeySuffix() string {
-	return c.set.KeySuffix()
-}
-func (c withIDsImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
-	return c.set.Get(ctx)
-}
-func (c withIDsImp) CacheTime() time.Duration {
-	return c.set.CacheTime()
-}
-func (c withIDsImp) Key() string {
-	return c.set.Key()
-}
-func (c withIDsImp) Warmup(ctx context.Context) error {
-	return c.set.Warmup(ctx)
+	return withIDsImp{WithWarmup: set, store: store}
 }
 
 func (c withIDsImp) IDs(ctx context.Context, opts ...options.PagenationOption) ([]set.ID, error) {
