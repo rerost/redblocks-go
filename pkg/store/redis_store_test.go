@@ -135,6 +135,27 @@ func TestRediStoreTTL(t *testing.T) {
 	if !(0 < ttl && ttl < cacheTime) {
 		t.Errorf("want: 0 < ttl < cacheTime but ttl: %v", ttl)
 	}
+
+	emptyKey := key + ":" + "EMPTY"
+	_, err = redisStore.TTL(ctx, emptyKey)
+	if diff := cmp.Diff(err.Error(), "Not found"); diff != "" {
+		t.Errorf(diff)
+	}
+
+	conn, err := redis.Dial("tcp", "localhost:6379")
+	if err != nil {
+		t.Error(err)
+	}
+
+	notExpireKey := key + ":" + "NOT_EXPIRE"
+	_, err = conn.Do("SET", notExpireKey, notExpireKey)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = redisStore.TTL(ctx, notExpireKey)
+	if diff := cmp.Diff(err.Error(), "Not configured expire"); diff != "" {
+		t.Errorf(diff)
+	}
 }
 
 func TestRedisStoreInterstore(t *testing.T) {
