@@ -9,8 +9,12 @@ vendor:
 
 PHONY: test
 test: vendor
-	go test -bench=. -race -coverprofile=coverage.txt -v ./...  | gex cgt
+	go test -race -coverprofile=coverage.txt -v ./...  | gex cgt
 
 PHONY: coverage
 coverage: test
 	go tool cover -html=coverage.txt
+
+PHONY: bench
+bench: vendor
+	go test -bench=. -race -v ./...
