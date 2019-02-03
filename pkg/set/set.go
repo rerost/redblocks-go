@@ -11,6 +11,7 @@ type Set interface {
 	KeySuffix() string
 	Get(ctx context.Context) ([]IDWithScore, error)
 	CacheTime() time.Duration
+	NotAvailableTTL() time.Duration // NotAvailableTTL < CacheTime. For processing
 }
 
 type ID = store.ID

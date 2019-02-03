@@ -61,6 +61,10 @@ func (r regionSetImp) CacheTime() time.Duration {
 	return time.Second * 1000
 }
 
+func (r regionSetImp) NotAvailableTTL() time.Duration {
+	return time.Second * 10
+}
+
 func newPool() *redis.Pool {
 	pool := &redis.Pool{
 		MaxIdle:     3,
@@ -95,7 +99,7 @@ func TestIntersection(t *testing.T) {
 	osaka := compose.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	interstored := operator.NewIntersectionSet(store, time.Second*100, tokyo, osaka)
+	interstored := operator.NewIntersectionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
 	interstoredResult, err := interstored.IDsWithScore(ctx)
 	if err != nil {
 		t.Error(err)
@@ -117,7 +121,7 @@ func TesUnion(t *testing.T) {
 	osaka := compose.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	interstored := operator.NewUnionSet(store, time.Second*100, tokyo, osaka)
+	interstored := operator.NewUnionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
 	interstoredResult, err := interstored.IDsWithScore(ctx)
 	if err != nil {
 		t.Error(err)

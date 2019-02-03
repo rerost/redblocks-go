@@ -88,6 +88,29 @@ func (s redisStoreImp) Exists(ctx context.Context, key string) (bool, error) {
 	return result, nil
 }
 
+func (s redisStoreImp) TTL(ctx context.Context, key string) (time.Duration, error) {
+	conn := s.pool.Get()
+
+	result, err := redis.Int64(conn.Do("TTL", key))
+
+	if err != nil {
+		return 0, fail.Wrap(err)
+	}
+
+	// See https://redis.io/commands/TTL
+	if result < 0 {
+		if result == -2 {
+			return 0, fail.Wrap(fail.New("Not found"), fail.WithParam("key", key))
+		}
+		if result == -1 {
+			return 0, fail.Wrap(fail.New("Not configured expire"), fail.WithParam("key", key))
+		}
+		panic(fail.Wrap(fail.New("Returned unexpected ttl"), fail.WithParam("key", key), fail.WithParam("ttl", result)))
+	}
+
+	return time.Duration(result * int64(time.Millisecond)), nil
+}
+
 func (s redisStoreImp) Interstore(ctx context.Context, dst string, keys ...string) error {
 	conn := s.pool.Get()
 	args := make([]interface{}, len(keys)+2, len(keys)+2)

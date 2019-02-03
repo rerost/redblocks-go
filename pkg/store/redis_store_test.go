@@ -111,6 +111,32 @@ func TestRedisStoreExists(t *testing.T) {
 	}
 }
 
+func TestRediStoreTTL(t *testing.T) {
+	redisStore := store.NewRedisStore(&redis.Pool{
+		MaxIdle:     3,
+		IdleTimeout: 240 * time.Second,
+		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
+	})
+
+	key := "TestRedisStoreTTL"
+
+	ctx := context.Background()
+
+	cacheTime := time.Second * 100
+	err := redisStore.Save(ctx, key, []store.IDWithScore{{ID: "1"}}, cacheTime)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ttl, err := redisStore.TTL(ctx, key)
+	if err != nil {
+		t.Error(err)
+	}
+	if !(0 < ttl && ttl < cacheTime) {
+		t.Errorf("want: 0 < ttl < cacheTime but ttl: %v", ttl)
+	}
+}
+
 func TestRedisStoreInterstore(t *testing.T) {
 	redisStore := store.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
