@@ -156,6 +156,7 @@ func TestRediStoreTTL(t *testing.T) {
 	if diff := cmp.Diff(err.Error(), "Not configured expire"); diff != "" {
 		t.Errorf(diff)
 	}
+	conn.Do("DEL", notExpireKey)
 }
 
 func TestRedisStoreInterstore(t *testing.T) {
