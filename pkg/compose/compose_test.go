@@ -58,7 +58,7 @@ func (r regionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
 }
 
 func (r regionSetImp) CacheTime() time.Duration {
-	return time.Second * 1000
+	return time.Second * 100
 }
 
 func (r regionSetImp) NotAvailableTTL() time.Duration {
