@@ -12,9 +12,9 @@ import (
 )
 
 type intersectionSetImp struct {
-	store         store.Store
-	sets          []compose.ComposedSet
-	cacheTime     time.Duration
+	store           store.Store
+	sets            []compose.ComposedSet
+	cacheTime       time.Duration
 	notAvailableTTL time.Duration
 }
 
@@ -24,9 +24,9 @@ func NewIntersectionSet(store store.Store, cacheTime time.Duration, notAvailable
 
 func NewIntersectionSetImp(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.WithUpdate {
 	return intersectionSetImp{
-		store:         store,
-		sets:          sets,
-		cacheTime:     cacheTime,
+		store:           store,
+		sets:            sets,
+		cacheTime:       cacheTime,
 		notAvailableTTL: notAvailableTTL,
 	}
 }
@@ -67,7 +67,7 @@ func (s intersectionSetImp) Update(ctx context.Context) error {
 		set.Warmup(ctx)
 	}
 
-	err := s.store.Interstore(ctx, s.Key(), keys...)
+	err := s.store.Interstore(ctx, s.Key(), s.CacheTime(), keys...)
 	if err != nil {
 		return fail.Wrap(err)
 	}
