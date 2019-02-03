@@ -205,7 +205,7 @@ func TestRedisStoreInterstore(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = redisStore.Interstore(ctx, key, key1, key2)
+	err = redisStore.Interstore(ctx, key, time.Second, key1, key2)
 	if err != nil {
 		t.Error(err)
 	}
@@ -266,7 +266,7 @@ func TestRedisStoreUnionstore(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = redisStore.Unionstore(ctx, key, key1, key2)
+	err = redisStore.Unionstore(ctx, key, time.Second, key1, key2)
 	if err != nil {
 		t.Error(err)
 	}

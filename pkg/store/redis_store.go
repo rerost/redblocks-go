@@ -111,7 +111,7 @@ func (s redisStoreImp) TTL(ctx context.Context, key string) (time.Duration, erro
 	return time.Duration(result * int64(time.Millisecond)), nil
 }
 
-func (s redisStoreImp) Interstore(ctx context.Context, dst string, keys ...string) error {
+func (s redisStoreImp) Interstore(ctx context.Context, dst string, expire time.Duration, keys ...string) error {
 	conn := s.pool.Get()
 	args := make([]interface{}, len(keys)+2, len(keys)+2)
 	args[0] = dst
@@ -120,11 +120,13 @@ func (s redisStoreImp) Interstore(ctx context.Context, dst string, keys ...strin
 		args[i+2] = k
 	}
 
-	_, err := conn.Do("ZINTERSTORE", args...)
+	conn.Send("ZINTERSTORE", args...)
+	conn.Send("EXPIRE", dst, expire.Seconds())
+	err := conn.Flush()
 	return fail.Wrap(err)
 }
 
-func (s redisStoreImp) Unionstore(ctx context.Context, dst string, keys ...string) error {
+func (s redisStoreImp) Unionstore(ctx context.Context, dst string, expire time.Duration, keys ...string) error {
 	conn := s.pool.Get()
 	args := make([]interface{}, len(keys)+2, len(keys)+2)
 	args[0] = dst
@@ -133,6 +135,8 @@ func (s redisStoreImp) Unionstore(ctx context.Context, dst string, keys ...strin
 		args[i+2] = k
 	}
 
-	_, err := conn.Do("ZUNIONSTORE", args...)
+	conn.Send("ZUNIONSTORE", args...)
+	conn.Send("EXPIRE", dst, expire.Seconds())
+	err := conn.Flush()
 	return fail.Wrap(err)
 }

@@ -12,9 +12,9 @@ import (
 )
 
 type unionSetImp struct {
-	store         store.Store
-	sets          []compose.ComposedSet
-	cacheTime     time.Duration
+	store           store.Store
+	sets            []compose.ComposedSet
+	cacheTime       time.Duration
 	notAvailableTTL time.Duration
 }
 
@@ -24,9 +24,9 @@ func NewUnionSet(store store.Store, cacheTime time.Duration, notAvailableTTL tim
 
 func NewUnionSetImp(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.WithUpdate {
 	return unionSetImp{
-		store:         store,
-		sets:          sets,
-		cacheTime:     cacheTime,
+		store:           store,
+		sets:            sets,
+		cacheTime:       cacheTime,
 		notAvailableTTL: notAvailableTTL,
 	}
 }
@@ -68,7 +68,7 @@ func (s unionSetImp) Update(ctx context.Context) error {
 		set.Warmup(ctx)
 	}
 
-	err := s.store.Unionstore(ctx, s.Key(), keys...)
+	err := s.store.Unionstore(ctx, s.Key(), s.CacheTime(), keys...)
 	if err != nil {
 		return fail.Wrap(err)
 	}
