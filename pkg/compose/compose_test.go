@@ -136,3 +136,30 @@ func TesUnion(t *testing.T) {
 		t.Errorf(diff)
 	}
 }
+
+func TestWithoutRedis(t *testing.T) {
+	pool := &redis.Pool{
+		MaxIdle:     3,
+		IdleTimeout: 240 & time.Second,
+		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6380") },
+	}
+	store := store.NewRedisStore(pool)
+	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
+	osaka := compose.Compose(NewRegionSet("osaka"), store)
+	ctx := context.Background()
+	_, err := tokyo.IDs(ctx)
+	if err == nil {
+		t.Errorf("Expected not nil")
+	}
+
+	err = tokyo.Warmup(ctx)
+	if err == nil {
+		t.Errorf("Expected not nil")
+	}
+
+	interstored := operator.NewIntersectionSet(store, 10*time.Second, time.Second, tokyo, osaka)
+	_, err = interstored.IDsWithScore(ctx)
+	if err == nil {
+		t.Errorf("Expected not nil")
+	}
+}
