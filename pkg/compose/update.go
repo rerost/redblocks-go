@@ -2,7 +2,6 @@ package compose
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/rerost/redblocks-go/pkg/set"
 	"github.com/rerost/redblocks-go/pkg/store"
@@ -26,7 +25,7 @@ func ComposeUpdate(set set.Set, store store.Store) WithUpdate {
 }
 
 func (c withUpdateImp) Key() string {
-	return reflect.TypeOf(c.Set).String() + ":" + c.Set.KeySuffix()
+	return "test" + ":" + c.Set.KeySuffix()
 }
 
 func (c withUpdateImp) Update(ctx context.Context) error {
