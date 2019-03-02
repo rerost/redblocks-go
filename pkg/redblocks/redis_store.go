@@ -111,14 +111,20 @@ func (s redisStoreImp) TTL(ctx context.Context, key string) (time.Duration, erro
 	return time.Duration(result * int64(time.Millisecond)), nil
 }
 
-func (s redisStoreImp) Interstore(ctx context.Context, dst string, expire time.Duration, keys ...string) error {
+func (s redisStoreImp) Interstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error {
 	conn := s.pool.Get()
-	args := make([]interface{}, len(keys)+2, len(keys)+2)
-	args[0] = dst
-	args[1] = len(keys)
-	for i, k := range keys {
-		args[i+2] = k
+	args := []interface{}{}
+	args = append(args, dst)
+	args = append(args, len(keys))
+	for _, k := range keys {
+		args = append(args, k)
 	}
+	args = append(args, "WEIGHTS")
+	for _, w := range weights {
+		args = append(args, w)
+	}
+	args = append(args, "AGGREGATE")
+	args = append(args, aggregate.String())
 
 	conn.Send("ZINTERSTORE", args...)
 	conn.Send("EXPIRE", dst, expire.Seconds())
@@ -126,14 +132,20 @@ func (s redisStoreImp) Interstore(ctx context.Context, dst string, expire time.D
 	return fail.Wrap(err)
 }
 
-func (s redisStoreImp) Unionstore(ctx context.Context, dst string, expire time.Duration, keys ...string) error {
+func (s redisStoreImp) Unionstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error {
 	conn := s.pool.Get()
-	args := make([]interface{}, len(keys)+2, len(keys)+2)
-	args[0] = dst
-	args[1] = len(keys)
-	for i, k := range keys {
-		args[i+2] = k
+	args := []interface{}{}
+	args = append(args, dst)
+	args = append(args, len(keys))
+	for _, k := range keys {
+		args = append(args, k)
 	}
+	args = append(args, "WEIGHTS")
+	for _, w := range weights {
+		args = append(args, w)
+	}
+	args = append(args, "AGGREGATE")
+	args = append(args, aggregate.String())
 
 	conn.Send("ZUNIONSTORE", args...)
 	conn.Send("EXPIRE", dst, expire.Seconds())

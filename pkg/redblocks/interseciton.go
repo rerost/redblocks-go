@@ -13,18 +13,22 @@ type intersectionSetImp struct {
 	sets            []ComposedSet
 	cacheTime       time.Duration
 	notAvailableTTL time.Duration
+	aggregate       Aggregate
+	weights         []float64
 }
 
-func NewIntersectionSet(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) ComposedSet {
-	return ComposeIDs(ComposeWarmup(NewIntersectionSetImp(store, cacheTime, notAvailableTTL, sets...), store), store)
+func NewIntersectionSet(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, weights []float64, aggregate Aggregate, sets ...ComposedSet) ComposedSet {
+	return ComposeIDs(ComposeWarmup(NewIntersectionSetImp(store, cacheTime, notAvailableTTL, weights, aggregate, sets...), store), store)
 }
 
-func NewIntersectionSetImp(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) WithUpdate {
+func NewIntersectionSetImp(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, weights []float64, aggregate Aggregate, sets ...ComposedSet) WithUpdate {
 	return intersectionSetImp{
 		store:           store,
 		sets:            sets,
 		cacheTime:       cacheTime,
 		notAvailableTTL: notAvailableTTL,
+		aggregate:       aggregate,
+		weights:         weights,
 	}
 }
 
@@ -64,7 +68,7 @@ func (s intersectionSetImp) Update(ctx context.Context) error {
 		set.Warmup(ctx)
 	}
 
-	err := s.store.Interstore(ctx, s.Key(), s.CacheTime(), keys...)
+	err := s.store.Interstore(ctx, s.Key(), s.CacheTime(), s.weights, s.aggregate, keys...)
 	if err != nil {
 		return fail.Wrap(err)
 	}

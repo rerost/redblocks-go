@@ -18,6 +18,6 @@ type Store interface {
 	GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDWithScore, error)
 	Exists(ctx context.Context, key string) (bool, error)
 	TTL(ctx context.Context, key string) (time.Duration, error)
-	Interstore(ctx context.Context, dst string, expire time.Duration, keys ...string) error
-	Unionstore(ctx context.Context, dst string, expire time.Duration, keys ...string) error
+	Interstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error
+	Unionstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error
 }

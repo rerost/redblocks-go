@@ -77,7 +77,7 @@ func main() {
 	tokyo := redblocks.Compose(NewRegionSet("tokyo"), store)
 	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 
-	sets := redblocks.NewIntersectionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
+	sets := redblocks.NewIntersectionSet(store, time.Second*100, time.Second*10, []float64{1, 1}, redblocks.Sum, tokyo, osaka)
 	ids, err := sets.IDs(ctx, options.WithPagenation(0, -1))
 	if err != nil {
 		fmt.Println(err)
