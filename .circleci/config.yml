@@ -7,7 +7,7 @@ jobs:
     context:
       codecov
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.12
       - image: redis:5.0.3
       
     working_directory: /go/src/github.com/rerost/redblocks-go
