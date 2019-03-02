@@ -19,6 +19,7 @@ var NewUnionSet func(store store.Store, cacheTime time.Duration, notAvailableTTL
 
 type IDWithScore = store.IDWithScore
 type Set = set.Set
+type ComposedSet = compose.ComposedSet
 
 func init() {
 	NewRedisStore = store.NewRedisStore
