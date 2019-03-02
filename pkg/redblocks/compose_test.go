@@ -50,6 +50,16 @@ func (r regionSetImp) Get(ctx context.Context) ([]redblocks.IDWithScore, error) 
 				ID: "test4",
 			},
 		},
+		"donotshow": {
+			{
+				ID:    "test1",
+				Score: -100,
+			},
+			{
+				ID:    "test2",
+				Score: -100,
+			},
+		},
 	}
 	return m[r.region], nil
 }
@@ -130,6 +140,23 @@ func TesUnion(t *testing.T) {
 	}
 
 	if diff := cmp.Diff(interstoredResult, osakaResult); diff != "" {
+		t.Errorf(diff)
+	}
+}
+
+func TestSubtraction(t *testing.T) {
+	store := redblocks.NewRedisStore(newPool())
+	donotshow := redblocks.Compose(NewRegionSet("donotshow"), store)
+	tokyo := redblocks.Compose(NewRegionSet("tokyo"), store)
+
+	ctx := context.Background()
+	subtracted := redblocks.NewSubtractionSet(store, time.Second*100, time.Second*10, tokyo, donotshow)
+	subtractedResult, err := subtracted.IDsWithScore(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(subtractedResult, []redblocks.IDWithScore{{ID: "test3", Score: 0}}); diff != "" {
 		t.Errorf(diff)
 	}
 }
