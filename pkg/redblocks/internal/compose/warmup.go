@@ -3,7 +3,7 @@ package compose
 import (
 	"context"
 
-	"github.com/rerost/redblocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 	"github.com/srvc/fail"
 )
 

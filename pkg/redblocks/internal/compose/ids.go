@@ -3,9 +3,9 @@ package compose
 import (
 	"context"
 
-	"github.com/rerost/redblocks-go/pkg/options"
-	"github.com/rerost/redblocks-go/pkg/set"
-	"github.com/rerost/redblocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/options"
 	"github.com/srvc/fail"
 )
 

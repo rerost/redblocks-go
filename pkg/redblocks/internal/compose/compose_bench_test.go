@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/rerost/redblocks-go/pkg/compose"
-	"github.com/rerost/redblocks-go/pkg/operator"
-	"github.com/rerost/redblocks-go/pkg/set"
-	"github.com/rerost/redblocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/compose"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/operator"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 )
 
 func NewNumberSet(num int, testID string) set.Set {
