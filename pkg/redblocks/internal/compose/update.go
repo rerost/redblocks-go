@@ -4,8 +4,8 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/rerost/redblocks-go/pkg/set"
-	"github.com/rerost/redblocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 	"github.com/srvc/fail"
 )
 

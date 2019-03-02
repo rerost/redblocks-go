@@ -7,7 +7,7 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/go-cmp/cmp"
-	"github.com/rerost/redblocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 )
 
 func TestRediStoreGetIDs(t *testing.T) {

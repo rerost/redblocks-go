@@ -7,11 +7,11 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/go-cmp/cmp"
-	"github.com/rerost/redblocks-go/pkg/compose"
-	"github.com/rerost/redblocks-go/pkg/operator"
-	"github.com/rerost/redblocks-go/pkg/options"
-	"github.com/rerost/redblocks-go/pkg/set"
-	"github.com/rerost/redblocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/compose"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/operator"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/options"
 )
 
 func NewRegionSet(region string) set.Set {

@@ -1,7 +1,7 @@
 package options
 
 import (
-	"github.com/rerost/redblocks-go/pkg/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 )
 
 type Operator struct {
