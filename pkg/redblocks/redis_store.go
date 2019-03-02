@@ -168,3 +168,9 @@ func (s redisStoreImp) Subtraction(ctx context.Context, dst string, expire time.
 	_, err := conn.Do("EXEC")
 	return fail.Wrap(err)
 }
+
+func (s redisStoreImp) Count(ctx context.Context, key string) (int64, error) {
+	conn := s.pool.Get()
+	count, err := redis.Int64(conn.Do("ZCARD", key))
+	return count, fail.Wrap(err)
+}

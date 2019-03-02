@@ -21,4 +21,5 @@ type Store interface {
 	Interstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error
 	Unionstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error
 	Subtraction(ctx context.Context, dst string, expire time.Duration, key1 string, key2 string) error
+	Count(ctx context.Context, key string) (int64, error)
 }
