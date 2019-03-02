@@ -1,9 +1,8 @@
-package compose
+package redblocks
 
 import (
 	"context"
 
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 	"github.com/srvc/fail"
 )
 
@@ -14,10 +13,10 @@ type WithWarmup interface {
 
 type withWarmupImp struct {
 	WithUpdate
-	store store.Store
+	store Store
 }
 
-func ComposeWarmup(withUpdate WithUpdate, store store.Store) WithWarmup {
+func ComposeWarmup(withUpdate WithUpdate, store Store) WithWarmup {
 	return withWarmupImp{WithUpdate: withUpdate, store: store}
 }
 

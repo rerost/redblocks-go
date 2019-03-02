@@ -1,27 +1,25 @@
-package compose
+package redblocks
 
 import (
 	"context"
 	"reflect"
 
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 	"github.com/srvc/fail"
 )
 
 type WithUpdate interface {
-	set.Set
+	Set
 	Key() string
 	Update(ctx context.Context) error
 	Available(ctx context.Context) (bool, error)
 }
 
 type withUpdateImp struct {
-	set.Set
-	store store.Store
+	Set
+	store Store
 }
 
-func ComposeUpdate(set set.Set, store store.Store) WithUpdate {
+func ComposeUpdate(set Set, store Store) WithUpdate {
 	return withUpdateImp{Set: set, store: store}
 }
 

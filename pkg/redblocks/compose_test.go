@@ -1,4 +1,4 @@
-package compose_test
+package redblocks_test
 
 import (
 	"context"
@@ -7,14 +7,11 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/go-cmp/cmp"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/compose"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/operator"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
-	"github.com/rerost/redblocks-go/pkg/redblocks/options"
+	"github.com/rerost/redblocks-go/pkg/options"
+	"github.com/rerost/redblocks-go/pkg/redblocks"
 )
 
-func NewRegionSet(region string) set.Set {
+func NewRegionSet(region string) redblocks.Set {
 	return regionSetImp{region}
 }
 
@@ -26,8 +23,8 @@ func (r regionSetImp) KeySuffix() string {
 	return r.region
 }
 
-func (r regionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
-	m := map[string][]set.IDWithScore{
+func (r regionSetImp) Get(ctx context.Context) ([]redblocks.IDWithScore, error) {
+	m := map[string][]redblocks.IDWithScore{
 		"tokyo": {
 			{
 				ID: "test1",
@@ -75,9 +72,9 @@ func newPool() *redis.Pool {
 }
 
 func TestCreateRegion(t *testing.T) {
-	store := store.NewRedisStore(newPool())
-	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
-	osaka := compose.Compose(NewRegionSet("osaka"), store)
+	store := redblocks.NewRedisStore(newPool())
+	tokyo := redblocks.Compose(NewRegionSet("tokyo"), store)
+	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 
 	if diff := cmp.Diff(tokyo.Key(), osaka.Key()); diff == "" {
 		t.Errorf("tokyo.Key and osaka.Key must be different")
@@ -88,18 +85,18 @@ func TestCreateRegion(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if diff := cmp.Diff(ids, []set.ID{"test1", "test2", "test3"}); diff != "" {
+	if diff := cmp.Diff(ids, []redblocks.ID{"test1", "test2", "test3"}); diff != "" {
 		t.Errorf(diff)
 	}
 }
 
 func TestIntersection(t *testing.T) {
-	store := store.NewRedisStore(newPool())
-	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
-	osaka := compose.Compose(NewRegionSet("osaka"), store)
+	store := redblocks.NewRedisStore(newPool())
+	tokyo := redblocks.Compose(NewRegionSet("tokyo"), store)
+	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	interstored := operator.NewIntersectionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
+	interstored := redblocks.NewIntersectionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
 	interstoredResult, err := interstored.IDsWithScore(ctx)
 	if err != nil {
 		t.Error(err)
@@ -116,12 +113,12 @@ func TestIntersection(t *testing.T) {
 }
 
 func TesUnion(t *testing.T) {
-	store := store.NewRedisStore(newPool())
-	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
-	osaka := compose.Compose(NewRegionSet("osaka"), store)
+	store := redblocks.NewRedisStore(newPool())
+	tokyo := redblocks.Compose(NewRegionSet("tokyo"), store)
+	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	interstored := operator.NewUnionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
+	interstored := redblocks.NewUnionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
 	interstoredResult, err := interstored.IDsWithScore(ctx)
 	if err != nil {
 		t.Error(err)
@@ -143,9 +140,9 @@ func TestWithoutRedis(t *testing.T) {
 		IdleTimeout: 240 & time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6380") },
 	}
-	store := store.NewRedisStore(pool)
-	tokyo := compose.Compose(NewRegionSet("tokyo"), store)
-	osaka := compose.Compose(NewRegionSet("osaka"), store)
+	store := redblocks.NewRedisStore(pool)
+	tokyo := redblocks.Compose(NewRegionSet("tokyo"), store)
+	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 	ctx := context.Background()
 	_, err := tokyo.IDs(ctx)
 	if err == nil {
@@ -157,7 +154,7 @@ func TestWithoutRedis(t *testing.T) {
 		t.Errorf("Expected not nil")
 	}
 
-	interstored := operator.NewIntersectionSet(store, 10*time.Second, time.Second, tokyo, osaka)
+	interstored := redblocks.NewIntersectionSet(store, 10*time.Second, time.Second, tokyo, osaka)
 	_, err = interstored.IDsWithScore(ctx)
 	if err == nil {
 		t.Errorf("Expected not nil")

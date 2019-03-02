@@ -1,28 +1,25 @@
-package operator
+package redblocks
 
 import (
 	"context"
 	"strings"
 	"time"
 
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/compose"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 	"github.com/srvc/fail"
 )
 
 type unionSetImp struct {
-	store           store.Store
-	sets            []compose.ComposedSet
+	store           Store
+	sets            []ComposedSet
 	cacheTime       time.Duration
 	notAvailableTTL time.Duration
 }
 
-func NewUnionSet(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.ComposedSet {
-	return compose.ComposeIDs(compose.ComposeWarmup(NewUnionSetImp(store, cacheTime, notAvailableTTL, sets...), store), store)
+func NewUnionSet(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) ComposedSet {
+	return ComposeIDs(ComposeWarmup(NewUnionSetImp(store, cacheTime, notAvailableTTL, sets...), store), store)
 }
 
-func NewUnionSetImp(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.WithUpdate {
+func NewUnionSetImp(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) WithUpdate {
 	return unionSetImp{
 		store:           store,
 		sets:            sets,
@@ -35,10 +32,10 @@ func (s unionSetImp) KeySuffix() string {
 	return ""
 }
 
-func (s unionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
+func (s unionSetImp) Get(ctx context.Context) ([]IDWithScore, error) {
 	err := s.Update(ctx)
 	if err != nil {
-		return []set.IDWithScore{}, fail.Wrap(err)
+		return []IDWithScore{}, fail.Wrap(err)
 	}
 	return s.store.GetIDsWithScore(ctx, s.Key(), 0, -1)
 }

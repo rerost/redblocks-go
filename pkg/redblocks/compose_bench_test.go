@@ -1,4 +1,4 @@
-package compose_test
+package redblocks_test
 
 import (
 	"context"
@@ -7,13 +7,10 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/compose"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/operator"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks"
 )
 
-func NewNumberSet(num int, testID string) set.Set {
+func NewNumberSet(num int, testID string) redblocks.Set {
 	return numberSetImp{num: num, testID: testID}
 }
 
@@ -26,10 +23,10 @@ func (s numberSetImp) KeySuffix() string {
 	return fmt.Sprintf("%d:%s", s.num, s.testID)
 }
 
-func (s numberSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
-	idsWithScore := make([]set.IDWithScore, 100, 100)
+func (s numberSetImp) Get(ctx context.Context) ([]redblocks.IDWithScore, error) {
+	idsWithScore := make([]redblocks.IDWithScore, 100, 100)
 	for i := 0; i < 100; i++ {
-		idsWithScore[i] = set.IDWithScore{ID: set.ID(fmt.Sprintf("%d", i)), Score: float64(i)}
+		idsWithScore[i] = redblocks.IDWithScore{ID: redblocks.ID(fmt.Sprintf("%d", i)), Score: float64(i)}
 	}
 
 	return idsWithScore, nil
@@ -43,7 +40,7 @@ func (s numberSetImp) NotAvailableTTL() time.Duration {
 }
 
 func BenchmarkWarmup(b *testing.B) {
-	store := store.NewRedisStore(&redis.Pool{
+	store := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 & time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
@@ -51,36 +48,36 @@ func BenchmarkWarmup(b *testing.B) {
 	ctx := context.Background()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		composed := compose.Compose(NewNumberSet(i, b.Name()), store)
+		composed := redblocks.Compose(NewNumberSet(i, b.Name()), store)
 		composed.Warmup(ctx)
 	}
 }
 
 func BenchmarkInterstoreWarmup(b *testing.B) {
-	store := store.NewRedisStore(&redis.Pool{
+	store := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 & time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
 	})
 	ctx := context.Background()
-	composes := make([]compose.ComposedSet, 10, 10)
+	composes := make([]redblocks.ComposedSet, 10, 10)
 	for i := 0; i < 10; i++ {
-		composes[i] = compose.Compose(NewNumberSet(i, b.Name()), store)
+		composes[i] = redblocks.Compose(NewNumberSet(i, b.Name()), store)
 	}
 	b.ResetTimer()
-	intersection := operator.NewIntersectionSet(store, 10*time.Second, 1*time.Second, composes...)
+	intersection := redblocks.NewIntersectionSet(store, 10*time.Second, 1*time.Second, composes...)
 	for i := 0; i < b.N; i++ {
 		intersection.Warmup(ctx)
 	}
 }
 
 func BenchmarkKey(b *testing.B) {
-	store := store.NewRedisStore(&redis.Pool{
+	store := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 & time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
 	})
-	compose := compose.Compose(NewNumberSet(1, b.Name()), store)
+	compose := redblocks.Compose(NewNumberSet(1, b.Name()), store)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		compose.Key()

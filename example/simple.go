@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+	"github.com/rerost/redblocks-go/pkg/options"
 	"github.com/rerost/redblocks-go/pkg/redblocks"
-	"github.com/rerost/redblocks-go/pkg/redblocks/options"
 )
 
 func newPool() *redis.Pool {

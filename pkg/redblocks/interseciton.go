@@ -1,28 +1,25 @@
-package operator
+package redblocks
 
 import (
 	"context"
 	"strings"
 	"time"
 
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/compose"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 	"github.com/srvc/fail"
 )
 
 type intersectionSetImp struct {
-	store           store.Store
-	sets            []compose.ComposedSet
+	store           Store
+	sets            []ComposedSet
 	cacheTime       time.Duration
 	notAvailableTTL time.Duration
 }
 
-func NewIntersectionSet(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.ComposedSet {
-	return compose.ComposeIDs(compose.ComposeWarmup(NewIntersectionSetImp(store, cacheTime, notAvailableTTL, sets...), store), store)
+func NewIntersectionSet(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) ComposedSet {
+	return ComposeIDs(ComposeWarmup(NewIntersectionSetImp(store, cacheTime, notAvailableTTL, sets...), store), store)
 }
 
-func NewIntersectionSetImp(store store.Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...compose.ComposedSet) compose.WithUpdate {
+func NewIntersectionSetImp(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) WithUpdate {
 	return intersectionSetImp{
 		store:           store,
 		sets:            sets,
@@ -35,10 +32,10 @@ func (s intersectionSetImp) KeySuffix() string {
 	return ""
 }
 
-func (s intersectionSetImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
+func (s intersectionSetImp) Get(ctx context.Context) ([]IDWithScore, error) {
 	err := s.Update(ctx)
 	if err != nil {
-		return []set.IDWithScore{}, fail.Wrap(err)
+		return []IDWithScore{}, fail.Wrap(err)
 	}
 	return s.store.GetIDsWithScore(ctx, s.Key(), 0, -1)
 }
