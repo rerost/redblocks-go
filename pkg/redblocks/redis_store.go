@@ -152,3 +152,19 @@ func (s redisStoreImp) Unionstore(ctx context.Context, dst string, expire time.D
 	err := conn.Flush()
 	return fail.Wrap(err)
 }
+
+// WARING: This function is experimental.
+// Because
+// - Slow
+// - set2's score needs to be much larger than set1' sscore
+// - set2's score needs to be a negative value
+func (s redisStoreImp) Subtraction(ctx context.Context, dst string, expire time.Duration, key1 string, key2 string) error {
+	conn := s.pool.Get()
+
+	conn.Send("MULTI")
+	conn.Send("ZUNIONSTORE", dst, 2, key1, key2, "WEIGHTS", 1, 1, "AGGREGATE", "SUM")
+	conn.Send("ZREMRANGEBYSCORE", dst, "-inf", "(0")
+	conn.Send("EXPIRE", dst, expire.Seconds())
+	_, err := conn.Do("EXEC")
+	return fail.Wrap(err)
+}

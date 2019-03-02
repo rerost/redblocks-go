@@ -20,4 +20,5 @@ type Store interface {
 	TTL(ctx context.Context, key string) (time.Duration, error)
 	Interstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error
 	Unionstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error
+	Subtraction(ctx context.Context, dst string, expire time.Duration, key1 string, key2 string) error
 }
