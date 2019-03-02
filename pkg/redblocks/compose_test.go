@@ -96,7 +96,7 @@ func TestIntersection(t *testing.T) {
 	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	interstored := redblocks.NewIntersectionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
+	interstored := redblocks.NewIntersectionSet(store, time.Second*100, time.Second*10, []float64{1, 1}, redblocks.Sum, tokyo, osaka)
 	interstoredResult, err := interstored.IDsWithScore(ctx)
 	if err != nil {
 		t.Error(err)
@@ -118,7 +118,7 @@ func TesUnion(t *testing.T) {
 	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 
 	ctx := context.Background()
-	interstored := redblocks.NewUnionSet(store, time.Second*100, time.Second*10, tokyo, osaka)
+	interstored := redblocks.NewUnionSet(store, time.Second*100, time.Second*10, []float64{1, 1}, redblocks.Sum, tokyo, osaka)
 	interstoredResult, err := interstored.IDsWithScore(ctx)
 	if err != nil {
 		t.Error(err)
@@ -154,7 +154,7 @@ func TestWithoutRedis(t *testing.T) {
 		t.Errorf("Expected not nil")
 	}
 
-	interstored := redblocks.NewIntersectionSet(store, 10*time.Second, time.Second, tokyo, osaka)
+	interstored := redblocks.NewIntersectionSet(store, 10*time.Second, time.Second, []float64{1, 1}, redblocks.Sum, tokyo, osaka)
 	_, err = interstored.IDsWithScore(ctx)
 	if err == nil {
 		t.Errorf("Expected not nil")

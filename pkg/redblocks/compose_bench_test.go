@@ -65,7 +65,7 @@ func BenchmarkInterstoreWarmup(b *testing.B) {
 		composes[i] = redblocks.Compose(NewNumberSet(i, b.Name()), store)
 	}
 	b.ResetTimer()
-	intersection := redblocks.NewIntersectionSet(store, 10*time.Second, 1*time.Second, composes...)
+	intersection := redblocks.NewIntersectionSet(store, 10*time.Second, 1*time.Second, []float64{1, 1}, redblocks.Sum, composes...)
 	for i := 0; i < b.N; i++ {
 		intersection.Warmup(ctx)
 	}

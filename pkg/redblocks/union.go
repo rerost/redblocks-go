@@ -13,18 +13,22 @@ type unionSetImp struct {
 	sets            []ComposedSet
 	cacheTime       time.Duration
 	notAvailableTTL time.Duration
+	aggregate       Aggregate
+	weights         []float64
 }
 
-func NewUnionSet(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) ComposedSet {
-	return ComposeIDs(ComposeWarmup(NewUnionSetImp(store, cacheTime, notAvailableTTL, sets...), store), store)
+func NewUnionSet(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, weights []float64, aggregate Aggregate, sets ...ComposedSet) ComposedSet {
+	return ComposeIDs(ComposeWarmup(NewUnionSetImp(store, cacheTime, notAvailableTTL, weights, aggregate, sets...), store), store)
 }
 
-func NewUnionSetImp(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, sets ...ComposedSet) WithUpdate {
+func NewUnionSetImp(store Store, cacheTime time.Duration, notAvailableTTL time.Duration, weights []float64, aggregate Aggregate, sets ...ComposedSet) WithUpdate {
 	return unionSetImp{
 		store:           store,
 		sets:            sets,
 		cacheTime:       cacheTime,
 		notAvailableTTL: notAvailableTTL,
+		aggregate:       aggregate,
+		weights:         weights,
 	}
 }
 
@@ -65,7 +69,7 @@ func (s unionSetImp) Update(ctx context.Context) error {
 		set.Warmup(ctx)
 	}
 
-	err := s.store.Unionstore(ctx, s.Key(), s.CacheTime(), keys...)
+	err := s.store.Unionstore(ctx, s.Key(), s.CacheTime(), s.weights, s.aggregate, keys...)
 	if err != nil {
 		return fail.Wrap(err)
 	}
