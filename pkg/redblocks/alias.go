@@ -1,29 +1,25 @@
-package operator
+package redblocks
 
 import (
 	"context"
 	"time"
-
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/compose"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/set"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
 )
 
 type aliasImp struct {
-	store           store.Store
+	store           Store
 	rediskey        string
 	notAvailableTTL time.Duration
 }
 
-func NewAliasSet(store store.Store, rediskey string, notAvailableTTL time.Duration) compose.ComposedSet {
-	return compose.ComposeIDs(aliasImp{store: store, rediskey: rediskey, notAvailableTTL: notAvailableTTL}, store)
+func NewAliasSet(store Store, rediskey string, notAvailableTTL time.Duration) ComposedSet {
+	return ComposeIDs(aliasImp{store: store, rediskey: rediskey, notAvailableTTL: notAvailableTTL}, store)
 }
 
 func (a aliasImp) KeySuffix() string {
 	return ""
 }
 
-func (a aliasImp) Get(ctx context.Context) ([]set.IDWithScore, error) {
+func (a aliasImp) Get(ctx context.Context) ([]IDWithScore, error) {
 	return a.store.GetIDsWithScore(ctx, a.Key(), 0, -1)
 }
 

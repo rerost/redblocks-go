@@ -1,4 +1,4 @@
-package store_test
+package redblocks_test
 
 import (
 	"context"
@@ -7,18 +7,18 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/go-cmp/cmp"
-	"github.com/rerost/redblocks-go/pkg/redblocks/internal/store"
+	"github.com/rerost/redblocks-go/pkg/redblocks"
 )
 
 func TestRediStoreGetIDs(t *testing.T) {
-	redisStore := store.NewRedisStore(&redis.Pool{
+	redisStore := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
 	})
 	key := "TestRediStoreGetIDs"
 	ctx := context.Background()
-	err := redisStore.Save(ctx, key, []store.IDWithScore{
+	err := redisStore.Save(ctx, key, []redblocks.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -37,13 +37,13 @@ func TestRediStoreGetIDs(t *testing.T) {
 		t.Error(err)
 	}
 
-	if diff := cmp.Diff(ids, []store.ID{"1", "2"}); diff != "" {
+	if diff := cmp.Diff(ids, []redblocks.ID{"1", "2"}); diff != "" {
 		t.Errorf(diff)
 	}
 }
 
 func TestRediStoreGetIDsWithScore(t *testing.T) {
-	redisStore := store.NewRedisStore(&redis.Pool{
+	redisStore := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
@@ -51,7 +51,7 @@ func TestRediStoreGetIDsWithScore(t *testing.T) {
 	key := "TestRediStoreGetIDsWithScore"
 	ctx := context.Background()
 
-	idsWithScore := []store.IDWithScore{
+	idsWithScore := []redblocks.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -78,7 +78,7 @@ func TestRediStoreGetIDsWithScore(t *testing.T) {
 }
 
 func TestRedisStoreExists(t *testing.T) {
-	redisStore := store.NewRedisStore(&redis.Pool{
+	redisStore := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
@@ -86,7 +86,7 @@ func TestRedisStoreExists(t *testing.T) {
 	key := "TestRedisStoreExists"
 	ctx := context.Background()
 
-	idsWithScore := []store.IDWithScore{
+	idsWithScore := []redblocks.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -112,7 +112,7 @@ func TestRedisStoreExists(t *testing.T) {
 }
 
 func TestRediStoreTTL(t *testing.T) {
-	redisStore := store.NewRedisStore(&redis.Pool{
+	redisStore := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
@@ -123,7 +123,7 @@ func TestRediStoreTTL(t *testing.T) {
 	ctx := context.Background()
 
 	cacheTime := time.Second * 100
-	err := redisStore.Save(ctx, key, []store.IDWithScore{{ID: "1"}}, cacheTime)
+	err := redisStore.Save(ctx, key, []redblocks.IDWithScore{{ID: "1"}}, cacheTime)
 	if err != nil {
 		t.Error(err)
 	}
@@ -160,7 +160,7 @@ func TestRediStoreTTL(t *testing.T) {
 }
 
 func TestRedisStoreInterstore(t *testing.T) {
-	redisStore := store.NewRedisStore(&redis.Pool{
+	redisStore := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
@@ -170,7 +170,7 @@ func TestRedisStoreInterstore(t *testing.T) {
 	key2 := "TestRedisStoreInterstore2"
 	ctx := context.Background()
 
-	idsWithScore1 := []store.IDWithScore{
+	idsWithScore1 := []redblocks.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -181,7 +181,7 @@ func TestRedisStoreInterstore(t *testing.T) {
 		},
 	}
 
-	idsWithScore2 := []store.IDWithScore{
+	idsWithScore2 := []redblocks.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -215,13 +215,13 @@ func TestRedisStoreInterstore(t *testing.T) {
 		t.Error(err)
 	}
 
-	if diff := cmp.Diff(result, []store.IDWithScore{{ID: "1", Score: 2}, {ID: "2", Score: 4}}); diff != "" {
+	if diff := cmp.Diff(result, []redblocks.IDWithScore{{ID: "1", Score: 2}, {ID: "2", Score: 4}}); diff != "" {
 		t.Errorf(diff)
 	}
 }
 
 func TestRedisStoreUnionstore(t *testing.T) {
-	redisStore := store.NewRedisStore(&redis.Pool{
+	redisStore := redblocks.NewRedisStore(&redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
@@ -231,7 +231,7 @@ func TestRedisStoreUnionstore(t *testing.T) {
 	key2 := "TestRedisStoreUnionstore2"
 	ctx := context.Background()
 
-	idsWithScore1 := []store.IDWithScore{
+	idsWithScore1 := []redblocks.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -242,7 +242,7 @@ func TestRedisStoreUnionstore(t *testing.T) {
 		},
 	}
 
-	idsWithScore2 := []store.IDWithScore{
+	idsWithScore2 := []redblocks.IDWithScore{
 		{
 			ID:    "1",
 			Score: 1,
@@ -276,7 +276,7 @@ func TestRedisStoreUnionstore(t *testing.T) {
 		t.Error(err)
 	}
 
-	if diff := cmp.Diff(result, []store.IDWithScore{{ID: "1", Score: 2}, {ID: "3", Score: 3}, {ID: "2", Score: 4}}); diff != "" {
+	if diff := cmp.Diff(result, []redblocks.IDWithScore{{ID: "1", Score: 2}, {ID: "3", Score: 3}, {ID: "2", Score: 4}}); diff != "" {
 		t.Errorf(diff)
 	}
 }
