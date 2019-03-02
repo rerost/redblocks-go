@@ -162,7 +162,7 @@ func (s redisStoreImp) Subtraction(ctx context.Context, dst string, expire time.
 	conn := s.pool.Get()
 
 	conn.Send("MULTI")
-	conn.Send("ZUNIONSTORE", dst, string(2), key1, key2, "WIEGHTS", 1, 1, "AGGREGATE", "SUM")
+	conn.Send("ZUNIONSTORE", dst, 2, key1, key2, "WEIGHTS", 1, 1, "AGGREGATE", "SUM")
 	conn.Send("ZREMRANGEBYSCORE", dst, "-inf", "(0")
 	conn.Send("EXPIRE", dst, expire.Seconds())
 	_, err := conn.Do("EXEC")

@@ -280,3 +280,68 @@ func TestRedisStoreUnionstore(t *testing.T) {
 		t.Errorf(diff)
 	}
 }
+
+func TestRedisStoreSubtraction(t *testing.T) {
+	redisStore := redblocks.NewRedisStore(&redis.Pool{
+		MaxIdle:     3,
+		IdleTimeout: 240 * time.Second,
+		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", "localhost:6379") },
+	})
+	key := "TestRedisStoreSubtraction"
+	key1 := "TestRedisStoreSubtraction1"
+	key2 := "TestRedisStoreSubtraction2"
+	ctx := context.Background()
+
+	idsWithScore1 := []redblocks.IDWithScore{
+		{
+			ID:    "1",
+			Score: 1,
+		},
+		{
+			ID:    "2",
+			Score: 2,
+		},
+		{
+			ID:    "4",
+			Score: 3,
+		},
+	}
+
+	idsWithScore2 := []redblocks.IDWithScore{
+		{
+			ID:    "1",
+			Score: -100,
+		},
+		{
+			ID:    "2",
+			Score: -100,
+		},
+		{
+			ID:    "3",
+			Score: -100,
+		},
+	}
+
+	err := redisStore.Save(ctx, key1, idsWithScore1, 100*time.Second)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = redisStore.Save(ctx, key2, idsWithScore2, 100*time.Second)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = redisStore.Subtraction(ctx, key, time.Second*100, key1, key2)
+	if err != nil {
+		t.Error(err)
+	}
+	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(result, []redblocks.IDWithScore{{ID: "4", Score: 3}}); diff != "" {
+		t.Errorf(diff)
+	}
+}
