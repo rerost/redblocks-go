@@ -61,3 +61,12 @@ func (c withIDsImp) IDsWithScore(ctx context.Context, opts ...options.Pagenation
 
 	return r, nil
 }
+
+func (c withIDsImp) Count(ctx context.Context) (int64, error) {
+	if err := c.Warmup(ctx); err != nil {
+		return 0, fail.Wrap(err)
+	}
+
+	count, err := c.store.Count(ctx, c.Key())
+	return count, fail.Wrap(err)
+}
