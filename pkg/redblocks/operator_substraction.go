@@ -44,7 +44,7 @@ func (s subtractionSetImp) Get(ctx context.Context) ([]IDWithScore, error) {
 	if err != nil {
 		return []IDWithScore{}, fail.Wrap(err)
 	}
-	return s.store.GetIDsWithScore(ctx, s.Key(), 0, -1)
+	return s.store.GetIDsWithScore(ctx, s.Key(), 0, -1, Asc)
 }
 
 func (s subtractionSetImp) CacheTime() time.Duration {

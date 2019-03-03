@@ -20,7 +20,7 @@ func (a aliasImp) KeySuffix() string {
 }
 
 func (a aliasImp) Get(ctx context.Context) ([]IDWithScore, error) {
-	return a.store.GetIDsWithScore(ctx, a.Key(), 0, -1)
+	return a.store.GetIDsWithScore(ctx, a.Key(), 0, -1, Asc)
 }
 
 func (a aliasImp) CacheTime() time.Duration {

@@ -31,7 +31,7 @@ func (c withIDsImp) IDs(ctx context.Context, opts ...PagenationOption) ([]ID, er
 		c.Warmup(ctx)
 	}
 
-	r, err := c.store.GetIDs(ctx, c.Key(), opt.Head, opt.Tail)
+	r, err := c.store.GetIDs(ctx, c.Key(), opt.Head, opt.Tail, opt.Order)
 	if err != nil {
 		return []ID{}, fail.Wrap(err)
 	}
@@ -53,7 +53,7 @@ func (c withIDsImp) IDsWithScore(ctx context.Context, opts ...PagenationOption) 
 		c.Warmup(ctx)
 	}
 
-	r, err := c.store.GetIDsWithScore(ctx, c.Key(), opt.Head, opt.Tail)
+	r, err := c.store.GetIDsWithScore(ctx, c.Key(), opt.Head, opt.Tail, opt.Order)
 	if err != nil {
 		return []IDWithScore{}, fail.Wrap(err)
 	}
