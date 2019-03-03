@@ -121,7 +121,7 @@ func TestIntersection(t *testing.T) {
 	}
 }
 
-func TesUnion(t *testing.T) {
+func TestUnion(t *testing.T) {
 	store := redblocks.NewRedisStore(newPool())
 	tokyo := redblocks.Compose(NewRegionSet("tokyo"), store)
 	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
