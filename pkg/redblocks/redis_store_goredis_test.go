@@ -320,3 +320,94 @@ func TestGoRedisStoreSubtraction(t *testing.T) {
 		t.Errorf(diff)
 	}
 }
+
+func TestGoRedisStoreIDsWithOrder(t *testing.T) {
+	redisStore := redblocks.NewGoredisStore(redisdb.WithContext)
+
+	key := "TestGoRedisStoreIDsWithOrder"
+	idsWithScore := []redblocks.IDWithScore{
+		{
+			ID:    "1",
+			Score: 1,
+		},
+		{
+			ID:    "2",
+			Score: 2,
+		},
+	}
+	ctx := context.Background()
+
+	err := redisStore.Save(ctx, key, idsWithScore, time.Second*100)
+	if err != nil {
+		t.Error(err)
+	}
+
+	ids, err := redisStore.GetIDs(ctx, key, 0, -1, redblocks.Asc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(ids, []redblocks.ID{"1", "2"}); diff != "" {
+		t.Error(diff)
+	}
+
+	ids, err = redisStore.GetIDs(ctx, key, 0, -1, redblocks.Desc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(ids, []redblocks.ID{"2", "1"}); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestGoRedisStoreIDWithScoresWithOrder(t *testing.T) {
+	redisStore := redblocks.NewGoredisStore(redisdb.WithContext)
+
+	key := "TestGoRedisStoreIDWithScoresWithOrder"
+	idsWithScore := []redblocks.IDWithScore{
+		{
+			ID:    "1",
+			Score: 1,
+		},
+		{
+			ID:    "2",
+			Score: 2,
+		},
+	}
+
+	revIdsWithScore := []redblocks.IDWithScore{
+		{
+			ID:    "2",
+			Score: 2,
+		},
+		{
+			ID:    "1",
+			Score: 1,
+		},
+	}
+	ctx := context.Background()
+
+	err := redisStore.Save(ctx, key, idsWithScore, time.Second*100)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, redblocks.Asc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(result, idsWithScore); diff != "" {
+		t.Error(diff)
+	}
+
+	result, err = redisStore.GetIDsWithScore(ctx, key, 0, -1, redblocks.Desc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if diff := cmp.Diff(result, revIdsWithScore); diff != "" {
+		t.Error(diff)
+	}
+}
