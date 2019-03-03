@@ -45,9 +45,9 @@ func (s redisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail 
 	var cmd string
 	switch order {
 	case Asc:
-		cmd = "ZREVRANGE"
-	case Desc:
 		cmd = "ZRANGE"
+	case Desc:
+		cmd = "ZREVRANGE"
 	default:
 		panic(fmt.Sprintf("Undefined order passed: %v", order.String()))
 	}
@@ -70,9 +70,9 @@ func (s redisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int
 	var cmd string
 	switch order {
 	case Asc:
-		cmd = "ZREVRANGE"
-	case Desc:
 		cmd = "ZRANGE"
+	case Desc:
+		cmd = "ZREVRANGE"
 	default:
 		panic(fmt.Sprintf("Undefined order passed: %v", order.String()))
 	}
