@@ -7,7 +7,6 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/go-cmp/cmp"
-	"github.com/rerost/redblocks-go/pkg/options"
 	"github.com/rerost/redblocks-go/pkg/redblocks"
 )
 
@@ -91,7 +90,7 @@ func TestCreateRegion(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	ids, err := tokyo.IDs(ctx, options.WithPagenation(0, -1))
+	ids, err := tokyo.IDs(ctx, redblocks.WithPagenation(0, -1))
 	if err != nil {
 		t.Error(err)
 	}

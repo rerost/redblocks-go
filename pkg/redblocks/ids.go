@@ -3,7 +3,6 @@ package redblocks
 import (
 	"context"
 
-	"github.com/rerost/redblocks-go/pkg/options"
 	"github.com/srvc/fail"
 )
 
@@ -18,8 +17,8 @@ func ComposeIDs(set WithWarmup, store Store) WithIDs {
 	return withIDsImp{WithWarmup: set, store: store}
 }
 
-func (c withIDsImp) IDs(ctx context.Context, opts ...options.PagenationOption) ([]ID, error) {
-	opt, err := options.PagenationOptionsToPagenationOption(opts)
+func (c withIDsImp) IDs(ctx context.Context, opts ...PagenationOption) ([]ID, error) {
+	opt, err := PagenationOptionsToPagenationOption(opts)
 	if err != nil {
 		return []ID{}, fail.Wrap(err)
 	}
@@ -40,8 +39,8 @@ func (c withIDsImp) IDs(ctx context.Context, opts ...options.PagenationOption) (
 	return r, nil
 }
 
-func (c withIDsImp) IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]IDWithScore, error) {
-	opt, err := options.PagenationOptionsToPagenationOption(opts)
+func (c withIDsImp) IDsWithScore(ctx context.Context, opts ...PagenationOption) ([]IDWithScore, error) {
+	opt, err := PagenationOptionsToPagenationOption(opts)
 	if err != nil {
 		return []IDWithScore{}, fail.Wrap(err)
 	}
