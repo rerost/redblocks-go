@@ -2,6 +2,7 @@ package redblocks
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -38,10 +39,20 @@ func (s redisStoreImp) Save(ctx context.Context, key string, idsWithScore []IDWi
 	return nil
 }
 
-func (s redisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail int64) ([]ID, error) {
+func (s redisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail int64, order Order) ([]ID, error) {
 	conn := s.pool.Get()
 
-	IDs, err := redis.Strings(conn.Do("ZRANGE", key, head, tail))
+	var cmd string
+	switch order {
+	case Asc:
+		cmd = "ZREVRANGE"
+	case Desc:
+		cmd = "ZRANGE"
+	default:
+		panic(fmt.Sprintf("Undefined order passed: %v", order.String()))
+	}
+
+	IDs, err := redis.Strings(conn.Do(cmd, key, head, tail))
 	if err != nil {
 		return []ID{}, fail.Wrap(err)
 	}
@@ -53,10 +64,20 @@ func (s redisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail 
 	return ids, nil
 }
 
-func (s redisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDWithScore, error) {
+func (s redisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64, order Order) ([]IDWithScore, error) {
 	conn := s.pool.Get()
 
-	results, err := redis.Strings(conn.Do("ZRANGE", key, head, tail, "WITHSCORES"))
+	var cmd string
+	switch order {
+	case Asc:
+		cmd = "ZREVRANGE"
+	case Desc:
+		cmd = "ZRANGE"
+	default:
+		panic(fmt.Sprintf("Undefined order passed: %v", order.String()))
+	}
+
+	results, err := redis.Strings(conn.Do(cmd, key, head, tail, "WITHSCORES"))
 	if err != nil {
 		return []IDWithScore{}, fail.Wrap(err)
 	}
