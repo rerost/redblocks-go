@@ -67,7 +67,7 @@ func TestGorediStoreGetIDsWithScore(t *testing.T) {
 		t.Error(err)
 	}
 
-	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, Asc)
+	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, redblocks.Asc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -193,7 +193,7 @@ func TestGoRedisStoreInterstore(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, Asc)
+	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, redblocks.Asc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -250,7 +250,7 @@ func TestGoRedisStoreUnionstore(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, Asc)
+	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, redblocks.Asc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -311,7 +311,7 @@ func TestGoRedisStoreSubtraction(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, Asc)
+	result, err := redisStore.GetIDsWithScore(ctx, key, 0, -1, redblocks.Asc)
 	if err != nil {
 		t.Error(err)
 	}
