@@ -2,6 +2,7 @@ package redblocks
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	go_redis "github.com/go-redis/redis"
@@ -10,30 +11,31 @@ import (
 
 type RedisClientFunc func(context context.Context) *go_redis.Client
 
-func NewRedblocksRedblocksStore(redisClientFunc RedisClientFunc) Store {
-	return redblocksRedblocksStoreImp{
+func NewGoredisStore(redisClientFunc RedisClientFunc) Store {
+	return newGoredisStoreImp{
 		redisClientFunc: redisClientFunc,
 	}
 }
 
-type redblocksRedblocksStoreImp struct {
+type newGoredisStoreImp struct {
 	redisClientFunc RedisClientFunc
 }
 
-func (s redblocksRedblocksStoreImp) Save(ctx context.Context, key string, idsWithScore []IDWithScore, expire time.Duration) error {
+func (s newGoredisStoreImp) Save(ctx context.Context, key string, idsWithScore []IDWithScore, expire time.Duration) error {
 	redisClient := s.redisClientFunc(ctx)
 	pipe := redisClient.Pipeline()
 
 	for _, idWithScore := range idsWithScore {
-		pipe.ZAdd(key, go_redis.Z{Member: idWithScore.ID, Score: idWithScore.Score})
+		pipe.ZAdd(key, go_redis.Z{Member: string(idWithScore.ID), Score: idWithScore.Score})
 	}
 
+	pipe.Expire(key, expire)
 	_, err := pipe.Exec()
 
 	return fail.Wrap(err)
 }
 
-func (s redblocksRedblocksStoreImp) GetIDs(ctx context.Context, key string, head int64, tail int64) ([]ID, error) {
+func (s newGoredisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail int64) ([]ID, error) {
 	redisClient := s.redisClientFunc(ctx)
 
 	cmd := redisClient.ZRange(key, head, tail)
@@ -49,7 +51,7 @@ func (s redblocksRedblocksStoreImp) GetIDs(ctx context.Context, key string, head
 	return ids, nil
 }
 
-func (s redblocksRedblocksStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDWithScore, error) {
+func (s newGoredisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDWithScore, error) {
 	redisClient := s.redisClientFunc(ctx)
 
 	rangeCmd := redisClient.ZRangeWithScores(key, head, tail)
@@ -69,7 +71,7 @@ func (s redblocksRedblocksStoreImp) GetIDsWithScore(ctx context.Context, key str
 	return idsWithScore, nil
 }
 
-func (s redblocksRedblocksStoreImp) Exists(ctx context.Context, key string) (bool, error) {
+func (s newGoredisStoreImp) Exists(ctx context.Context, key string) (bool, error) {
 	redisClient := s.redisClientFunc(ctx)
 
 	cmd := redisClient.Exists(key)
@@ -80,7 +82,7 @@ func (s redblocksRedblocksStoreImp) Exists(ctx context.Context, key string) (boo
 	return cmd.Val() == 1, nil
 }
 
-func (s redblocksRedblocksStoreImp) TTL(ctx context.Context, key string) (time.Duration, error) {
+func (s newGoredisStoreImp) TTL(ctx context.Context, key string) (time.Duration, error) {
 	redisClient := s.redisClientFunc(ctx)
 
 	cmd := redisClient.TTL(key)
@@ -88,11 +90,21 @@ func (s redblocksRedblocksStoreImp) TTL(ctx context.Context, key string) (time.D
 	if err := cmd.Err(); err != nil {
 		return 0, fail.Wrap(err)
 	}
+	result := cmd.Val()
+	if result < 0 {
+		if result == -2*time.Second {
+			return 0, fail.Wrap(fail.New("Not found"), fail.WithParam("key", key))
+		}
+		if result == -1*time.Second {
+			return 0, fail.Wrap(fail.New("Not configured expire"), fail.WithParam("key", key))
+		}
+		panic(fail.Wrap(fail.New(fmt.Sprintf("Returned unexpected ttl: %v", result)), fail.WithParam("key", key), fail.WithParam("ttl", result)))
+	}
 
-	return cmd.Val(), nil
+	return result, nil
 }
 
-func (s redblocksRedblocksStoreImp) Interstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error {
+func (s newGoredisStoreImp) Interstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error {
 	redisClient := s.redisClientFunc(ctx)
 
 	pipe := redisClient.Pipeline()
@@ -107,7 +119,7 @@ func (s redblocksRedblocksStoreImp) Interstore(ctx context.Context, dst string, 
 	return fail.Wrap(err)
 }
 
-func (s redblocksRedblocksStoreImp) Unionstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error {
+func (s newGoredisStoreImp) Unionstore(ctx context.Context, dst string, expire time.Duration, weights []float64, aggregate Aggregate, keys ...string) error {
 	redisClient := s.redisClientFunc(ctx)
 
 	pipe := redisClient.Pipeline()
@@ -127,7 +139,7 @@ func (s redblocksRedblocksStoreImp) Unionstore(ctx context.Context, dst string, 
 // - Slow
 // - set2's score needs to be much larger than set1' sscore
 // - set2's score needs to be a negative value
-func (s redblocksRedblocksStoreImp) Subtraction(ctx context.Context, dst string, expire time.Duration, key1 string, key2 string) error {
+func (s newGoredisStoreImp) Subtraction(ctx context.Context, dst string, expire time.Duration, key1 string, key2 string) error {
 	redisClient := s.redisClientFunc(ctx)
 
 	pipe := redisClient.TxPipeline()
@@ -143,7 +155,7 @@ func (s redblocksRedblocksStoreImp) Subtraction(ctx context.Context, dst string,
 	return fail.Wrap(err)
 }
 
-func (s redblocksRedblocksStoreImp) Count(ctx context.Context, key string) (int64, error) {
+func (s newGoredisStoreImp) Count(ctx context.Context, key string) (int64, error) {
 	redisClient := s.redisClientFunc(ctx)
 
 	cmd := redisClient.ZCard(key)
