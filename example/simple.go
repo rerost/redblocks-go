@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/rerost/redblocks-go/pkg/options"
 	"github.com/rerost/redblocks-go/pkg/redblocks"
 )
 
@@ -78,7 +77,7 @@ func main() {
 	osaka := redblocks.Compose(NewRegionSet("osaka"), store)
 
 	sets := redblocks.NewIntersectionSet(store, time.Second*100, time.Second*10, []float64{1, 1}, redblocks.Sum, tokyo, osaka)
-	ids, err := sets.IDs(ctx, options.WithPagenation(0, -1))
+	ids, err := sets.IDs(ctx, redblocks.WithPagenation(0, -1))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

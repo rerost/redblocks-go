@@ -35,10 +35,19 @@ func (s newGoredisStoreImp) Save(ctx context.Context, key string, idsWithScore [
 	return fail.Wrap(err)
 }
 
-func (s newGoredisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail int64) ([]ID, error) {
+func (s newGoredisStoreImp) GetIDs(ctx context.Context, key string, head int64, tail int64, order Order) ([]ID, error) {
 	redisClient := s.redisClientFunc(ctx)
 
-	cmd := redisClient.ZRange(key, head, tail)
+	var cmd *go_redis.StringSliceCmd
+	switch order {
+	case Asc:
+		cmd = redisClient.ZRange(key, head, tail)
+	case Desc:
+		cmd = redisClient.ZRevRange(key, head, tail)
+	default:
+		panic(fmt.Sprintf("Undefined order passed: %v", order.String()))
+	}
+
 	if err := cmd.Err(); err != nil {
 		return []ID{}, fail.Wrap(err)
 	}
@@ -51,14 +60,23 @@ func (s newGoredisStoreImp) GetIDs(ctx context.Context, key string, head int64, 
 	return ids, nil
 }
 
-func (s newGoredisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64) ([]IDWithScore, error) {
+func (s newGoredisStoreImp) GetIDsWithScore(ctx context.Context, key string, head int64, tail int64, order Order) ([]IDWithScore, error) {
 	redisClient := s.redisClientFunc(ctx)
 
-	rangeCmd := redisClient.ZRangeWithScores(key, head, tail)
-	if err := rangeCmd.Err(); err != nil {
+	var cmd *go_redis.ZSliceCmd
+	switch order {
+	case Asc:
+		cmd = redisClient.ZRangeWithScores(key, head, tail)
+	case Desc:
+		cmd = redisClient.ZRevRangeWithScores(key, head, tail)
+	default:
+		panic(fmt.Sprintf("Undefined order passed: %v", order.String()))
+	}
+
+	if err := cmd.Err(); err != nil {
 		return []IDWithScore{}, fail.Wrap(err)
 	}
-	results := rangeCmd.Val()
+	results := cmd.Val()
 
 	idsWithScore := make([]IDWithScore, len(results), len(results))
 	for i, result := range results {

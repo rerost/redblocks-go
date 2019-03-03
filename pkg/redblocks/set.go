@@ -3,8 +3,6 @@ package redblocks
 import (
 	"context"
 	"time"
-
-	"github.com/rerost/redblocks-go/pkg/options"
 )
 
 type Set interface {
@@ -20,8 +18,8 @@ type ComposedSet interface {
 	Update(ctx context.Context) error
 	Available(ctx context.Context) (bool, error)
 	Warmup(ctx context.Context) error
-	IDs(ctx context.Context, opts ...options.PagenationOption) ([]ID, error)
-	IDsWithScore(ctx context.Context, opts ...options.PagenationOption) ([]IDWithScore, error)
+	IDs(ctx context.Context, opts ...PagenationOption) ([]ID, error)
+	IDsWithScore(ctx context.Context, opts ...PagenationOption) ([]IDWithScore, error)
 	Count(ctx context.Context) (int64, error)
 }
 
