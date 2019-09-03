@@ -7,7 +7,7 @@ This package is Go implemntation of [Altech/red_blocks](https://github.com/Altec
 
 ## install
 ```bash
-go get -u /Users/user/.go/src/github.com/rerost/redblocks-go
+go get -u github.com/rerost/redblocks-go
 ```
 
 ## Example
